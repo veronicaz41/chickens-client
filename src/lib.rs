@@ -22,3 +22,8 @@ pub fn setup(seed: &Uint8Array) {
     let seed = vec_to_array::<u8, 32>(seed_vec);
     set_common_reference_seed(seed);
 }
+
+#[wasm_bindgen]
+pub fn add(a: i32, b: i32) -> i32 {
+    a + b
+}

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import './App.css';
 import { useGetParam } from "./queries/useGetParam";
-import { setup } from "chickens-wasm";
+import { add } from 'chickens-wasm';
 
 
 function App() {
@@ -9,8 +9,9 @@ function App() {
 
 
   useEffect(() => {
-    setup(param.data);
-  });
+    // setup(param.data);
+    add(1, 1);
+  }, []);
 
   return (
     <div className="App">
