@@ -1,21 +1,23 @@
 import { useEffect } from "react";
 import './App.css';
 import { useGetParam } from "./queries/useGetParam";
-import { add } from 'chickens-wasm';
+import { setup } from 'chickens-wasm';
 
 
 function App() {
-  const param = useGetParam();
-
+  const { data } = useGetParam();
 
   useEffect(() => {
-    // setup(param.data);
-    add(1, 1);
-  }, []);
+    if (data) {
+      let seed = new Uint8Array(data);
+      setup(seed);
+    }
+  }, [data]);
 
   return (
     <div className="App">
       <p>Chickens</p>
+      <p>{data}</p>
     </div>
   );
 }
