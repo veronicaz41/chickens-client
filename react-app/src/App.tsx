@@ -1,44 +1,49 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import './App.css';
 import useStore from "./hooks/useStore";
 import { useGetParam } from "./hooks/useGetParam";
 import { useRegister } from "./hooks/useRegister";
-import * as wasm from 'chickens-wasm';
+import * as wasm from 'chickens-5';
 
 
 function App() {
-  const hasHydrated = useStore((state) => state._hasHydrated);
+  const [serverKeyShare, setServerKeyShare] = useState(null);
   const userName = "v";
-  const userId = useStore((state) => state.userId);
+  const user = useStore((state) => state.user);
+  const pzClient = useStore((state) => state.pzClient);
   const setPZClient = useStore((state) => state.setPZClient);
 
   const { data } = useGetParam();
   const { mutate: register } = useRegister();
 
   useEffect(() => {
-    if (data) {
-      const seed = new Uint8Array(data);
-      wasm.init(seed);
-
+    if (user === null) {
+      console.log("register user");
       register(userName);
     }
-  }, [data, register]);
+  }, [user, register]);
 
   useEffect(() => {
-    if (userId) {
-      const pz = wasm.PZClient.new(userId, 4);
+    if (pzClient === null && data && user) {
+      console.log("call wasm PZClient.new");
+      const seed = new Uint8Array(data);
+      const pz = wasm.PZClient.new(seed);
       setPZClient(pz);
     }
-  }, [userId, setPZClient]);
+  }, [pzClient, data, user, setPZClient]);
 
-  if (!hasHydrated) {
-    return <p>Loading...</p>;
-  }
+  useEffect(() => {
+    if (serverKeyShare === null && pzClient) {
+      console.log("call wasm PZClient gen_key_share");
+      let sks = pzClient.gen_server_key_share(user.id, 4);
+      setServerKeyShare(sks);
+    }
+  }, [pzClient, serverKeyShare, setServerKeyShare]);
 
   return (
     <div className="App">
       <p>Chickens</p>
-      <p>UserId: {userId}</p>
+      <p>User: {user?.id}</p>
     </div>
   );
 }

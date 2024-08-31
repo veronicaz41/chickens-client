@@ -3212,7 +3212,7 @@ check-types@^11.2.3:
   resolved "https://registry.npmjs.org/check-types/-/check-types-11.2.3.tgz"
   integrity sha512-+67P1GkJRaxQD6PKK0Et9DhwQB+vGg3PM5+aavopCpZT1lj9jeqfvpgTLAWErNj8qApkkmXlu/Ug74kmhagkXg==
 
-"chickens-wasm@file:../pkg":
+"chickens-5@file:../pkg":
   version "0.1.0"
 
 chokidar@^3.4.2, chokidar@^3.5.3:

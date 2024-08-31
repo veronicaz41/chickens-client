@@ -1,16 +1,16 @@
 import { useMutation } from '@tanstack/react-query';
 import useStore from "./useStore";
 
-const register = async (name: string) => {
+const submitServerKeyShare = async (args: ISubmitServerKeyShareArgs) => {
 if (!process.env.REACT_APP_SERVER_URL)
     throw new Error("REACT_APP_SERVER_URL not set");
 
     const response = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}/register`,
+        `${process.env.REACT_APP_SERVER_URL}/submit_sks`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name })
+          body: JSON.stringify({ ...args })
         }
       );
 
@@ -22,19 +22,18 @@ if (!process.env.REACT_APP_SERVER_URL)
     return data;
 };
 
-export const useRegister = () => {
+export const useSubmitServerKeyShare= () => {
   const setUser = useStore((state) => state.setUser);
 
   return useMutation({
-    mutationKey: ["register"],
-    mutationFn: async (name: string) => {
-      return register(name);
+    mutationKey: ["submitServerKeyShare"],
+    mutationFn: async (args: ISubmitServerKeyShareArgs) => {
+      return submitServerKeyShare(args);
     },
-    onSuccess: (data) => {
-      setUser(data);
-    },
-    onError: () => {
-      setUser(null);
-    }
   });
 };
+
+export interface ISubmitServerKeyShareArgs {
+    userId: string;
+    sks: string;
+}

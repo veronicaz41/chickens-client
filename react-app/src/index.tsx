@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import wasm from "chickens-wasm";
+import wasm from "chickens-5";
 
 const queryClient = new QueryClient()
 
@@ -20,11 +20,11 @@ wasm()
   .catch(console.error)
   .then(() => {
     root.render(
-      <React.StrictMode>
+      <>
         <QueryClientProvider client={queryClient}>
           <App />
           </QueryClientProvider>
-      </React.StrictMode>
+      </>
     );
     
   });

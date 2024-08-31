@@ -3,23 +3,14 @@ mod utils;
 use itertools::Itertools;
 use std::convert::TryInto;
 
-use js_sys::{BigUint64Array, Uint8Array};
+use js_sys::Uint8Array;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::Serializer;
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::{wasm_bindgen, JsValue};
 
 use phantom_zone::*;
-use phantom_zone::{
-    evaluator::NonInteractiveMultiPartyCrs,
-    keys::CommonReferenceSeededNonInteractiveMultiPartyServerKeyShare, parameters::BoolParameters,
-};
 
 pub type Seed = [u8; 32];
-pub type ServerKeyShare = CommonReferenceSeededNonInteractiveMultiPartyServerKeyShare<
-    Vec<Vec<u64>>,
-    BoolParameters<u64>,
-    NonInteractiveMultiPartyCrs<Seed>,
->;
 pub const PARAMETER: ParameterSelector = ParameterSelector::NonInteractiveLTE4Party;
 
 fn vec_to_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
@@ -28,52 +19,48 @@ fn vec_to_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
 }
 
 #[wasm_bindgen]
-pub fn init(seed: &Uint8Array) {
-    set_parameter_set(PARAMETER);
-    let seed_vec = seed.to_vec();
-    let seed = vec_to_array::<u8, 32>(seed_vec);
-    set_common_reference_seed(seed);
-}
-
-#[wasm_bindgen]
 #[derive(Clone, Serialize, Deserialize)]
 pub struct PZClient {
-    // client_key: ClientKey,
-    // server_key_share: ServerKeyShare,
+    client_key: ClientKey,
     circuit_output: Option<Vec<FheBool>>,
 }
 
 #[wasm_bindgen]
 impl PZClient {
-    pub fn new(user_id: usize, total_users: usize) -> PZClient {
+    pub fn new(seed: &Uint8Array) -> PZClient {
         utils::set_panic_hook();
 
-        log!("{:?}", user_id);
-        log!("{:?}", total_users);
+        set_parameter_set(PARAMETER);
 
-        // let client_key = gen_client_key();
-        // log!("{:?}", client_key);
+        let seed_vec = seed.to_vec();
+        let seed = vec_to_array::<u8, 32>(seed_vec);
+        set_common_reference_seed(seed);
 
-        // let server_key_share = gen_server_key_share(user_id, total_users, &client_key);
-        // log!("{:?}", server_key_share);
+        let client_key = gen_client_key();
 
         PZClient {
-            // client_key,
-            // server_key_share,
+            client_key,
             circuit_output: None,
         }
     }
 
+    pub fn gen_server_key_share(&self, user_id: usize, total_users: usize) -> JsValue {
+        let s = Serializer::new().serialize_large_number_types_as_bigints(true);
+        gen_server_key_share(user_id, total_users, &self.client_key)
+            .serialize(&s)
+            .unwrap()
+    }
+
     // for input, we represent the Vec<bool> as an Uint8Array, each bool would be an u8
     // in rust, Vec<bool> have the same layout as Vec<u8> anyway
-    // pub fn encrypt(&self, input: &Uint8Array) -> JsValue {
-    //     let input = input.to_vec().into_iter().map(|u| u != 0).collect_vec();
-    //     let s = Serializer::new().serialize_large_number_types_as_bigints(true);
-    //     self.client_key
-    //         .encrypt(input.as_slice())
-    //         .serialize(&s)
-    //         .unwrap()
-    // }
+    pub fn encrypt(&self, input: &Uint8Array) -> JsValue {
+        let input = input.to_vec().into_iter().map(|u| u != 0).collect_vec();
+        let s = Serializer::new().serialize_large_number_types_as_bigints(true);
+        self.client_key
+            .encrypt(input.as_slice())
+            .serialize(&s)
+            .unwrap()
+    }
 
     // // circuit_output should be Vec<FheBool>
     // pub fn set_circuit_output(&mut self, circuit_output: JsValue) {
