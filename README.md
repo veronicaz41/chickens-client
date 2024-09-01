@@ -28,4 +28,8 @@ The React app is in `react-app` directory.
 
 It is still work in progress.
 
-To run the code for benchmarking, you need to create a production build with `yarn build`.
+To run the code for benchmarking, you need to use production build, run
+```
+yarn build
+npx serve -s build
+```
