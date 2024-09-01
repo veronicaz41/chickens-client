@@ -28,6 +28,11 @@ The React app is in `react-app` directory.
 
 It is still work in progress.
 
+You can use the Rust server in https://github.com/veronicaz41/chickens, run the server
+```
+cargo run -r --bin server
+```
+
 To run the code for benchmarking, you need to use production build, run
 ```
 yarn build
