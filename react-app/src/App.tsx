@@ -1,19 +1,19 @@
-import { useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import './App.css';
 import useStore from "./hooks/useStore";
 import { useGetParam } from "./hooks/useGetParam";
 import { useRegister } from "./hooks/useRegister";
-import * as wasm from 'chickens-5';
+import * as wasm from 'chickens-wasm';
 
 
 function App() {
+  const [pzClient, setPZClient] = useState<any>(null);
   const [serverKeyShare, setServerKeyShare] = useState(null);
+
   const userName = "v";
   const user = useStore((state) => state.user);
-  const pzClient = useStore((state) => state.pzClient);
-  const setPZClient = useStore((state) => state.setPZClient);
 
-  const { data } = useGetParam();
+  const { data: param } = useGetParam();
   const { mutate: register } = useRegister();
 
   useEffect(() => {
@@ -24,21 +24,24 @@ function App() {
   }, [user, register]);
 
   useEffect(() => {
-    if (pzClient === null && data && user) {
-      console.log("call wasm PZClient.new");
-      const seed = new Uint8Array(data);
+    if (pzClient === null && param && user) {
+      console.time("init_web time");
+      const seed = new Uint8Array(param);
       const pz = wasm.PZClient.new(seed);
+      console.timeEnd("init_web time");
       setPZClient(pz);
     }
-  }, [pzClient, data, user, setPZClient]);
+  }, [pzClient, param, user, setPZClient]);
 
   useEffect(() => {
     if (serverKeyShare === null && pzClient) {
-      console.log("call wasm PZClient gen_key_share");
-      let sks = pzClient.gen_server_key_share(user.id, 4);
+      console.time("gen_server_key_share time");
+      let sks = pzClient?.gen_server_key_share(user.id, 4);
+      console.timeEnd("gen_server_key_share time");
+      console.log(sks);
       setServerKeyShare(sks);
     }
-  }, [pzClient, serverKeyShare, setServerKeyShare]);
+  }, [pzClient, user, serverKeyShare, setServerKeyShare]);
 
   return (
     <div className="App">
