@@ -14,7 +14,7 @@ cd my-project
 To build the project, run
 
 ```
-wasm-pack build
+wasm-pack build --target web
 ```
 
 It will compile our Rust code in `src` directory into a WebAssembly `.wasm` binary via `cargo`; and use `wasm-bindgen` to
